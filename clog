@@ -1,0 +1,19 @@
+#! /bin/bash
+a=`ls | grep $1`
+echo $a
+if [ "$a" = "" ]
+then
+     echo "WARNING: No such file!!!"
+     echo "Terminate(T|t) or continue(Any other key):"
+     read opt
+     opt="`echo $opt|tr '[:lower:]' '[:upper:]'`"
+     if [ "$opt" = "T" ]
+     then
+         return
+#[ ! -f ] && { echo "FILE doesn't exist"; [ $SHLVL -gt 1 ] && exit 1; [ $SHLVL -eq "1" ] && return; }
+#         exit 1
+     fi
+fi
+date >> $1;
+tail $1;
+cat >> $1
