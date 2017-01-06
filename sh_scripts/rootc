@@ -1,0 +1,20 @@
+if [ $# -ne 1 ]
+then
+   echo 'Usage: rootc foo.C'
+   exit 1
+fi
+SRC=$1
+SRCEXT=`echo $SRC | sed -e 's/^.*\(..\)$/\1/'`
+if [ $SRCEXT != ".C" ]
+then
+   echo 'Error: the source file name MUST be ended with .C!'
+   exit 1
+fi
+EXE=`basename $1 .C`
+CC=g++
+#CXXFLAGS=-Wno-deprecated
+CXXFLAGS="-Wno-deprecated -std=c++11"
+INCDIR=-I`root-config --incdir`
+RTLIBS=`root-config --glibs`
+echo "$CC $CXXFLAGS $INCDIR $RTLIBS -o $EXE $SRC"
+$CC $CXXFLAGS $INCDIR $RTLIBS -o $EXE $SRC
