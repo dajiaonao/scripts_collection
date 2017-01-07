@@ -7,6 +7,16 @@
 //    * Status print out
 //    * Tree name configuration from cmd line
 //
+//  Usage:
+//  - compile:
+//  g++ -Wno-deprecated -std=c++11 -I/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/root/6.04.14-x86_64-slc6-gcc49-opt/include -L/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase/x86_64/root/6.04.14-x86_64-slc6-gcc49-opt/lib -lGui -lCore -lRIO -lNet -lHist -lGraf -lGraf3d -lGpad -lTree -lRint -lPostscript -lMatrix -lPhysics -lMathCore -lThread -pthread -lm -ldl -rdynamic -o skim_chain skim_chain.C
+//
+// Example:
+// ./skim_chain -t JPsiTPReco/Trees/IDProbes_JPsi_OC/TPTree_IDProbes_JPsi_OC -s "tag_matched_HLT_mu6_bJpsi_Trkloose==1" -o test1.root -l flist1.list -b branches.conf
+//
+// Note:
+//  * lines in the conf files starting with '#' will be skipped
+//
 ///////////////////////////
 
 #include <unistd.h> //getopt
@@ -16,10 +26,10 @@
 #include <TChain.h>
 #include <TEntryList.h>
 #include <TFile.h>
-using std::cout;
-using std::endl;
 
-int skim_chain(TChain& oldtree, TString selection="", TString outFileName="skimmed.root"){
+using namespace std;
+
+int skim_chain(TChain& oldtree, TString selection="", TString outFileName="skimmed.root", string bListName=""){
 
   Long64_t chainEntries = oldtree.GetEntries();
   if(chainEntries==0){
@@ -37,6 +47,19 @@ int skim_chain(TChain& oldtree, TString selection="", TString outFileName="skimm
 
   Long64_t listEntries = elist->GetN();
   cout << listEntries << "/" << chainEntries << " will be save in the new tree" << endl;
+
+  /// set branch names if given
+  if(bListName!=""){
+    oldtree.SetBranchStatus("*", 0);
+
+    ifstream infile(bListName);
+    string brname;
+    while(infile >> brname){
+      if(brname=="" || brname[0]=='#') continue;
+//       cout << brname << endl;
+      oldtree.SetBranchStatus(brname.c_str(), 1);
+     }
+   }
 
   /// start copying
   TFile *newfile = new TFile(outFileName,"recreate");
@@ -114,6 +137,7 @@ int main(int argc, char *argv[]){
         std::string filename;
         while(infile >> filename)
          {
+          if(filename=="" || filename[0]=='#') continue;
           TString tmp(filename);
           fList.push_back(tmp);
          }
@@ -141,7 +165,7 @@ int main(int argc, char *argv[]){
   for(auto& f: fList) ch->Add(f);
 //   cout << filenames << " / " << selections << " / " << outname << endl;
 
-  return skim_chain(*ch,selections,outname);
+  return skim_chain(*ch,selections,outname,bListName);
 
 }
 
