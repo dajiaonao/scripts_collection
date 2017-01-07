@@ -44,9 +44,16 @@ int skim_chain(TChain& oldtree, TString selection="", TString outFileName="skimm
   // get entry list
   oldtree.Draw(">>elist",selection, "entrylist");
   TEntryList *elist = (TEntryList*)gDirectory->Get("elist");
+//   elist->Print("all");
 
   Long64_t listEntries = elist->GetN();
   cout << listEntries << "/" << chainEntries << " will be save in the new tree" << endl;
+
+  /// a hack -- the treenumber is wrong
+  TIter next(elist->GetLists());
+  TEntryList* ilist;
+  int i(0);
+  while( (ilist = (TEntryList*)next()) ) {ilist->SetTreeNumber(i++);}
 
   /// set branch names if given
   if(bListName!=""){
@@ -64,9 +71,17 @@ int skim_chain(TChain& oldtree, TString selection="", TString outFileName="skimm
   /// start copying
   TFile *newfile = new TFile(outFileName,"recreate");
   TTree *newtree = oldtree.CloneTree(0);
+  Int_t treenum=0;
   for(Long64_t el =0;el<listEntries;el++) {
-    oldtree.GetEntry(elist->GetEntry(el));
-//     cout << el << "/" << elist->GetEntry(el) << endl;
+    Long64_t treeEntry = elist->GetEntryAndTree(el,treenum);
+    Long64_t chainEntry = treeEntry+oldtree.GetTreeOffset()[treenum];
+//     elist->GetCurrentList()->Print("all");
+
+    oldtree.GetEntry(chainEntry);
+//     cout << el << "/" << elist->GetEntry(el) << "/" << treenum << "/" << treeEntry << "/" << chainEntry
+//          << "/" << elist->GetTreeNumber()
+//          << "/" << elist->GetCurrentList()->GetTreeNumber()
+//           << endl;
 
     newfile->cd();
     newtree->Fill();
@@ -162,9 +177,12 @@ int main(int argc, char *argv[]){
   }
 
   if(!ch) ch = new TChain();
+
+  cout << "creating the chain" << endl;
   for(auto& f: fList) ch->Add(f);
 //   cout << filenames << " / " << selections << " / " << outname << endl;
 
+  cout << "Start skimming" << endl;
   return skim_chain(*ch,selections,outname,bListName);
 
 }
