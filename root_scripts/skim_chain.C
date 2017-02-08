@@ -13,6 +13,7 @@
 //
 // Example:
 // ./skim_chain -t JPsiTPReco/Trees/IDProbes_JPsi_OC/TPTree_IDProbes_JPsi_OC -s "tag_matched_HLT_mu6_bJpsi_Trkloose==1" -o test1.root -l flist1.list -b branches.conf
+// ./skim_chain -t JPsiTPMuon/Trees/MuonProbe_JPsi_OC_LooseProbes/TPTree_MuonProbe_JPsi_OC_LooseProbes -s "tag_pt<10000&&probe_pt<10000" -o test2.root -l flist1.list -b muBr.list
 //
 // Note:
 //  * lines in the conf files starting with '#' will be skipped
@@ -50,6 +51,7 @@ int skim_chain(TChain& oldtree, TString selection="", TString outFileName="skimm
   cout << listEntries << "/" << chainEntries << " will be save in the new tree" << endl;
 
   /// a hack -- the treenumber is wrong
+  elist->SetTreeNumber(0);
   TIter next(elist->GetLists());
   TEntryList* ilist;
   int i(0);
@@ -93,8 +95,6 @@ int skim_chain(TChain& oldtree, TString selection="", TString outFileName="skimm
   return 0;
 };
 
-
-
 int skim_chain1(TString chainFiles="", TString selection="", TString outFileName="skimmed.root"){
 
   if(chainFiles==""){
@@ -126,10 +126,12 @@ int main(int argc, char *argv[]){
         std::cout << "Usage: " << argv[0]
           << " [-h]"
           << " [-b branch list]" 
+          << " [-s selection]" 
           << " [-f file1,file2...]"
           << " [-l fileList.txt ]"
           << " [-t tree name ]"
-          << " [-r runN ]"
+//           << " [-r runN ]"
+          << " [-o outFile ]"
           << " [-d dirTag ]"
           << std::endl;
         exit(0);
