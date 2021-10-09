@@ -2,8 +2,6 @@
 import os, sys, re
 from subprocess import call,Popen
 from math import sqrt, ceil
-# from ROOT import *
-# from rootUtil import useAtlasStyle, waitRootCmd, savehistory
 
 def makeSafe(x):
     return re.sub('[^\]_','\_',x)
@@ -349,8 +347,4 @@ def findProcess(cmd='okular T2C.pdf'):
     return call(['pgrep', '-f', cmd])
 
 if __name__ == '__main__':
-#     savehistory('.')
-#     useAtlasStyle()
     main()
-#     print findProcess()
-#     for fun in funlist: print fun()
