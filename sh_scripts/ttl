@@ -1,0 +1,19 @@
+#!/bin/bash
+#---------------
+# https://github.com/dajiaonao/scripts_collection  
+#---------------
+file=$1
+if [ ! -f ${file} ] || [ "X${file}" = "X" ]; then
+   echo "Usage: ${0} textFile"
+   echo "Error: textFile is not given or not found: ${file}"
+   exit 0
+fi
+
+hd1=`grep -v "^#" ${file} |head -1`
+echo -e -n "\033[34mstructure of tree: \033[35m${hd1}\033[0m"
+echo
+grep '^#' $file
+
+hd=`$SC_PATH/root_scripts/phase_header.py ${hd1}`
+echo $hd
+root -l $SC_PATH/root_scripts/ttl.C\(\"${file}\",\"\",\"${hd}\"\);

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import os, sys, re
-from subprocess import call
+from subprocess import call,Popen
 from math import sqrt, ceil
 # from ROOT import *
 # from rootUtil import useAtlasStyle, waitRootCmd, savehistory
@@ -34,15 +34,15 @@ class slidesReport:
     def makeHeader(self):
         self.header=r'\documentclass'
         if self.aratio: self.header+='[aspectratio='+self.aratio+']'
+# \usepackage{slidesphysics}
         self.header += r'''{beamer}
-\usepackage{slidesphysics}
 \usepackage[latin1]{inputenc}'''
         if self.cHeader: self.header += self.cHeader
         self.header += r'''
-\usetheme{AnnArbor}
+\usetheme{CCNU}
 \title{'''+self.title+r'''}
 \author{'''+self.author+r'''}
-\institute{University of Michigan}
+\institute[CCNU]{Central China Normal University}
 \date{\today}
 \begin{document}
 
@@ -64,7 +64,7 @@ class slidesReport:
 \end{figure}
 \end{frame}'''
 
-    def addMultiFigureSlide(self, title, figures, caption='', nFigPerRow=3, totalwidth=None):
+    def addMultiFigureSlide(self, title, figures, captionOpt=None, nFigPerRow=3, totalwidth=None):
         if not totalwidth: totalwidth = self.pageWidth
         self.slides += '\n\n'+r'\begin{frame}{'+title.replace('_',r'\_')+r'''}
 \begin{figure}
@@ -77,7 +77,11 @@ class slidesReport:
                 nInRow = 0
             self.slides += '\n'+inc_fig+fig+'}'
             nInRow += 1
-        if caption: self.slides += '\n'+r'\caption{'+caption.replace('_',r'\_')+'}'
+        if captionOpt is None:
+            if len(figures)==1: caption = figures[0]
+            else: caption = ''
+        else: caption = captionOpt
+        if caption!='': self.slides += '\n'+r'\caption{'+caption.replace('_',r'\_')+'}'
         self.slides += '\n'+r'\end{figure}'+'\n'+r'\end{frame}'
 
     def addSlide(self, s):
@@ -155,6 +159,8 @@ class slidesReport:
         if compile1: 
             call(['pdflatex', filename])
             call(['pdflatex', filename])
+        return filename.replace('.tex','.pdf')
+
 
 # class fFileCompare:
 #     def __init__(self, flist=None, reporter=None):
@@ -242,7 +248,7 @@ def main():
 
     parser = OptionParser()
     parser.add_option('-f', "--inputFigures", help="all input file", default=None)
-    parser.add_option('-T', "--title", help="title of the slides", default='Plots')
+    parser.add_option('-T', "--title", help="title of the slides", default='Quick Plots')
     parser.add_option('-c', "--inputConf", help="list of input file", default=None)
     parser.add_option('-o', "--output", help="direcotry for output files", default=None)
     parser.add_option("-w", "--wide1", action='store_true', default=False, help="use 16:10 size")
@@ -254,6 +260,8 @@ def main():
     parser.add_option("--width", help='page width', type=float, default=None)
     parser.add_option("--clean1", help='clean the temprary files', action='store_true', default=False)
     parser.add_option("--clean2", help='clean the all temprary files', action='store_true', default=False)
+    parser.add_option("--oCmd", help='opening command', default='okular')
+    parser.add_option('-N', "--noOpen", help="don't open pdf file when it's compiled", action='store_true', default=False)
 
     (options, args) = parser.parse_args()
 #     print args
@@ -291,7 +299,7 @@ def main():
             for i in figs:
                 x = i[:i.rfind('.')]
                 if len(figures) == nfig:
-                    s1.addMultiFigureSlide(key, figures, '', options.mColumn)
+                    s1.addMultiFigureSlide(key, figures, None, options.mColumn)
                     figures = []
                 else:
                     figures.append(x)
@@ -302,20 +310,47 @@ def main():
             figures.append(i[:i.rfind('.')])
             print figures
             if len(figures) == nfig:
-                s1.addMultiFigureSlide('', figures, '', options.mColumn)
+                s1.addMultiFigureSlide('', figures, None, options.mColumn)
                 figures = []
         if figures:
-            s1.addMultiFigureSlide('', figures, '', options.mColumn)
+            s1.addMultiFigureSlide('', figures, None, options.mColumn)
 
     ### configuration file
     if options.inputConf: s1.processFile(options.inputConf)
 
     ### finaly, compile the report
-    s1.report()
+    pdfFile = s1.report()
 
+    ### open the file if it's not opened yet and requested
+    #     if not options.noOpen and os.path.isfile(pdfFile) and call(['pgrep', '-f', ' '.join(openCmd)])!=0 and which(openCmd[0]) is not None:
+    if not options.noOpen:
+        openCmd = [options.oCmd, pdfFile]
+        if which(openCmd[0]) is None:
+            print 'command', openCmd[0], 'does not exist'
+            return
+        if call(['pgrep', '-f', ' '.join(openCmd)])==0:
+            print 'file', openCmd[1], 'probably is already opened with', openCmd[0], ', find/check/refersh your windows'
+            print 'run `',' '.join(openCmd),'` to debug'
+            return
+        if not os.path.isfile(pdfFile):
+            print 'file', openCmd[1], ' is not found. Check early (file production) processes'
+            return
+        print 'Opening file', openCmd[1], 'with', openCmd[0]
+        Popen(openCmd)
+
+def which(cmd):
+    for path in os.environ["PATH"].split(os.pathsep):
+        if os.path.exists(os.path.join(path, cmd)):
+                return os.path.join(path, cmd)
+    return None
+
+
+def findProcess(cmd='okular T2C.pdf'):
+    return call(['pgrep', '-f', cmd])
 
 if __name__ == '__main__':
 #     savehistory('.')
 #     useAtlasStyle()
     main()
+#     print findProcess()
 #     for fun in funlist: print fun()

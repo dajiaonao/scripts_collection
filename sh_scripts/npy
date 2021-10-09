@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ $# -gt 0 ]; then
+    if [ -e $1 ]; then
+        echo "$1 already exist...";
+    else
+        cp -i $SC_PATH/py_scripts/templete_new.py $1;
+	chmod u+x $1
+    fi;
+    vi $1;
+else
+    echo "Usage: $FUNCNAME [newfilename]";
+fi
