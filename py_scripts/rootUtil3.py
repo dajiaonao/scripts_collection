@@ -307,9 +307,9 @@ def setStyle(style):
     style.SetPadBottomMargin(0.10)
     style.SetPadLeftMargin(0.10)
 
-
 def useDefaultStyle():
-    useLHCbStyle()
+    useNxStyle()
+
 def useLHCbStyle():
     gROOT.ProcessLine(".x lhcbStyle.C")
     gStyle.SetNdivisions(506, 'XYZ')
@@ -321,9 +321,8 @@ def useAtlasStyle():
     gStyle.SetNdivisions(506, 'XYZ')
 
 def useNxStyle():
-    gROOT.LoadMacro("NvDExStyle.C")
-    from ROOT import SetNvDExStyle
-    SetNvDExStyle()
+    gROOT.ProcessLine(".x NxStyle.C")
+    gStyle.SetNdivisions(506, 'XYZ')
 
 def savehistory(dir1=os.environ["HOME"]):
     import rlcompleter, readline
