@@ -1,0 +1,58 @@
+alias la='ls -a'
+alias rff='rf *~'
+alias ls='ls --color=auto'
+alias rf='rm -f'
+alias rm='rm -i'
+alias ll='ls -lh'
+alias lt='ll -t'
+alias lh='lt |head'
+alias cp='cp -i'
+alias mv='mv -i'
+alias em='emacs -nw'
+alias lf='ls -F'
+alias g+++='g++ -g -Wall'
+alias ssh='ssh -X'
+alias cdb='cd $OLDPWD'
+alias vr='vi -R'
+alias vp='vi -p'
+alias zsync='rsync -avz'
+alias toafs='cd /afs/cern.ch/user/d/dzhang'
+alias movepng='mv *.png png/'
+alias gotomarked='cd `cat ~/.markedpath`'
+alias markHere='pwd >| ~/.markedpath'
+
+PS1="\[\033[32m\]\u\[\033[33m\]@\h\[\033[m\]:\W \!\[\033[36m\]$\[\033[m\]"
+if [ ! -z $STY ]; then
+	STYs=${STY#*\.} ### for name
+	STYs=${STYs%\.*} ### needed for unnamed 
+	PS1="\[\033[32m\]\u\[\033[33m\]@\h\[\033[37m[$STYs]\[\033[m\]:\W \!\[\033[36m\]$\[\033[m\]"
+fi
+export PS1
+
+set -o notify
+set -o noclobber
+shopt -s direxpand
+#my own orders
+
+export LANG=English
+export GREP_OPTIONS='--color=auto'
+# GREP_COLOR='00;38;5;157'
+if [ "$STY" != "" ]; then ## check if this is a screen session
+	export TMOUT=
+fi
+
+clt()
+{
+cd `lt |awk '/^d/{print $9}' |head -1`
+}
+
+#### ssh-agent
+#if [ -f $SCRIPTDIR/system/other/ssh-find-agent.sh ]; then
+#        source $SCRIPTDIR/system/other/ssh-find-agent.sh
+#	ssh-find-agent -a
+#	if [ -z "$SSH_AUTH_SOCK" ]
+#	then
+#	   eval $(ssh-agent) > /dev/null
+#	   ssh-add -l >/dev/null || alias ssh='ssh-add -l >/dev/null || ssh-add && unalias ssh; ssh'
+#        fi
+#fi
