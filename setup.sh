@@ -1,7 +1,7 @@
 #setup the scripts
 # echo $#
 # export SC_PATH=`dirname $(realpath $1)`
-SC_PATH="/public/home/lhcb/scripts/scripts_collection"
+export SC_PATH="/public/home/lhcb/scripts/scripts_collection"
 
 # ### bin: ttl slideReport
 export PATH=$SC_PATH/sh_scripts:$PATH
