@@ -1,7 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import os, sys, re
 from subprocess import call,Popen
 from math import sqrt, ceil
+# from ROOT import *
+# from rootUtil import useAtlasStyle, waitRootCmd, savehistory
 
 def makeSafe(x):
     return re.sub('[^\]_','\_',x)
@@ -32,12 +34,12 @@ class slidesReport:
     def makeHeader(self):
         self.header=r'\documentclass'
         if self.aratio: self.header+='[aspectratio='+self.aratio+']'
-# \usepackage{slidesphysics}
         self.header += r'''{beamer}
+%\usepackage{slidesphysics}
 \usepackage[latin1]{inputenc}'''
         if self.cHeader: self.header += self.cHeader
         self.header += r'''
-\usetheme{CCNU}
+%\usetheme{CCNU}
 \title{'''+self.title+r'''}
 \author{'''+self.author+r'''}
 \institute[CCNU]{Central China Normal University}
@@ -104,9 +106,9 @@ class slidesReport:
                     self.slides += r'\\'
                     nInRow = 0
                 self.slides += '\n'+inc_fig+fig+'}'
-                print inc_fig
-                print fig
-                print self.slides
+                print(inc_fig)
+                print(fig)
+                print(self.slides)
                 nInRow += 1
             if s.caption: self.slides += '\n'+r'\caption{'+s.caption.replace('_',r'\_')+'}'
             self.slides += '\n'+r'\end{figure}'
@@ -133,7 +135,7 @@ class slidesReport:
                 x = line[2:]
                 if k == 't:':
                     s0.title = x
-                    print s0.title
+                    print(s0.title)
                 elif k == 'p:':
                     s0.points.append(x)
                 elif k == 'g:':
@@ -290,9 +292,9 @@ def main():
                 dict1[x1[options.groupKey]].append(a)
             except KeyError:
                 dict1[x1[options.groupKey]] = [a]
-        print dict1
-        for key,figs in dict1.iteritems():
-            print figs
+        print(dict1)
+        for key,figs in dict1.items():
+            print(figs)
             figures = []
             for i in figs:
                 x = i[:i.rfind('.')]
@@ -306,7 +308,7 @@ def main():
         figures = []
         for i in args:
             figures.append(i[:i.rfind('.')])
-            print figures
+            print(figures)
             if len(figures) == nfig:
                 s1.addMultiFigureSlide('', figures, None, options.mColumn)
                 figures = []
@@ -324,16 +326,16 @@ def main():
     if not options.noOpen:
         openCmd = [options.oCmd, pdfFile]
         if which(openCmd[0]) is None:
-            print 'command', openCmd[0], 'does not exist'
+            print('command', openCmd[0], 'does not exist')
             return
         if call(['pgrep', '-f', ' '.join(openCmd)])==0:
-            print 'file', openCmd[1], 'probably is already opened with', openCmd[0], ', find/check/refersh your windows'
-            print 'run `',' '.join(openCmd),'` to debug'
+            print('file', openCmd[1], 'probably is already opened with', openCmd[0], ', find/check/refersh your windows')
+            print('run `',' '.join(openCmd),'` to debug')
             return
         if not os.path.isfile(pdfFile):
-            print 'file', openCmd[1], ' is not found. Check early (file production) processes'
+            print('file', openCmd[1], ' is not found. Check early (file production) processes')
             return
-        print 'Opening file', openCmd[1], 'with', openCmd[0]
+        print('Opening file', openCmd[1], 'with', openCmd[0])
         Popen(openCmd)
 
 def which(cmd):
@@ -347,4 +349,8 @@ def findProcess(cmd='okular T2C.pdf'):
     return call(['pgrep', '-f', cmd])
 
 if __name__ == '__main__':
+#     savehistory('.')
+#     useAtlasStyle()
     main()
+#     print findProcess()
+#     for fun in funlist: print fun()
